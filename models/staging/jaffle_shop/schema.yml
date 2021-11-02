@@ -1,0 +1,82 @@
+version: 2
+
+sources:
+  - name: jaffle_shop
+    description: A clone of a Postgres application database
+    database: dbt-tutorial
+    tables:
+      - name: customers
+        description: Raw customer data
+        columns:
+          - name: id
+            description: Primary key for customers
+            tests:
+              - unique
+              - not_null
+
+      - name: orders
+        description: Raw orders data
+        columns:
+          - name: id
+            description: Primary key for orders
+            tests:
+              - unique
+              - not_null
+
+  - name: stripe
+    description: A clone of the stripe database
+    database: dbt-tutorial
+    tables: 
+      - name: payment
+
+
+models:
+  - name: stage_customers
+    description: One unique customer per row
+    columns:
+      - name: customer_id
+        description: Primary key for stage_customers
+        tests:
+          - not_null
+          - unique
+  
+  - name: stage_orders
+    description: Staged order data from Jaffle shop app
+    columns:
+      - name: order_id
+        description: Primary key for stage_orders
+        tests:
+          - unique
+          - not_null
+      - name: status
+        description: '{{ doc("order_status") }}'
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['returned', 'completed', 'shipped', 'placed', 'return_pending']
+      - name: customer_id
+        description: Foreign key to stage_customers.customer_id
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stage_customers')
+              field: customer_id
+
+  - name: stage_payments
+    description: Staged payment data from Jaffle shop app
+    columns:
+      - name: payment_id
+        description: Primary key for stage_payments 
+        tests:
+            - unique
+            - not_null
+      - name: status
+        tests:
+          - accepted_values:
+              values: ['success', 'fail']
+      - name: payment_method
+        description: '{{ doc("payment_status") }}'
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['bank_transfer', 'credit_card', 'coupon', gift_card]

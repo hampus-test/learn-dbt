@@ -1,0 +1,26 @@
+version: 2
+
+models:
+  - name: fact_orders
+    description: A fact table with orders and amounts
+    columns:
+      - name: order_id
+        description: Primary key for orders
+        tests:
+          - not_null
+      - name: customer_id
+        description: Foreign key for stage_customers
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stage_customers')
+              field: customer_id
+        
+  - name: fact_customers
+    description: A dimension table of customers with amounts of orders, first and most recent order date
+    columns:
+      - name: customer_id
+        description: Primary key for customers
+        tests:
+          - not_null
+          - unique
